@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Outfit Recommender</title>
+    <style>
+        body { 
+            font-family: Arial; 
+            margin: 0; 
+            padding: 50px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            background-attachment: fixed;
+        }
+        
+        .form-container { 
+            max-width: 400px; 
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2d3436;
+            margin-bottom: 20px;
+        }
+        
+        input { 
+            padding: 12px; 
+            font-size: 16px; 
+            width: 250px; 
+            margin: 8px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #0984e3;
+        }
+        
+        button { 
+            padding: 12px 25px; 
+            font-size: 16px; 
+            background: linear-gradient(45deg, #0984e3, #74b9ff);
+            color: white; 
+            border: none; 
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .error { 
+            color: #e17055; 
+            margin: 15px;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .autocomplete-container { position: relative; display: inline-block; }
+        .suggestions { 
+            position: absolute; 
+            background: white; 
+            border: 1px solid #ccc;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        .suggestion-item:hover { background: #f8f9fa; }
+        .suggestion-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>🌤️ Weather Outfit Recommender</h1>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form action="/weather" method="get">
+            <div class="autocomplete-container">
+                <input type="text" id="cityInput" name="city" placeholder="Enter city name" required>
+                <div id="suggestions" class="suggestions" style="display: none;"></div>
+            </div>
+            <br><br>
+            <button type="submit">Get Weather & Outfit</button>
+        </form>
+    </div>
+
+    <script>
+        let timeout;
+        document.getElementById('cityInput').addEventListener('input', function(e) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => searchCities(e.target.value), 300);
+        });
+
+        function searchCities(query) {
+            if (query.length < 3) {
+                document.getElementById('suggestions').style.display = 'none';
+                return;
+            }
+            
+            fetch(`/search_cities?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(cities => showSuggestions(cities));
+        }
+
+        function showSuggestions(cities) {
+            const suggestionsDiv = document.getElementById('suggestions');
+            if (cities.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+            
+            suggestionsDiv.innerHTML = cities.map(city => 
+                `<div class="suggestion-item" onclick="selectCity('${city.name}')">${city.display}</div>`
+            ).join('');
+            
+            suggestionsDiv.style.display = 'block';
+        }
+
+        function selectCity(cityName) {
+            document.getElementById('cityInput').value = cityName;
+            document.getElementById('suggestions').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

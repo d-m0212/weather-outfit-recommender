@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather in {{ data.city }}</title>
+    <style>
+        body { 
+            font-family: Arial; 
+            margin: 0; 
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-attachment: fixed;
+            
+            /* Dynamic backgrounds based on weather */
+            {% if 'rain' in data.description.lower() %}
+                background: linear-gradient(135deg, #636e72, #2d3436);
+            {% elif 'snow' in data.description.lower() %}
+                background: linear-gradient(135deg, #74b9ff, #ffffff);
+            {% elif 'cloud' in data.description.lower() %}
+                background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            {% elif 'clear' in data.description.lower() or 'sun' in data.description.lower() %}
+                background: linear-gradient(135deg, #fdcb6e, #e17055);
+            {% else %}
+                background: linear-gradient(135deg, #74b9ff, #0984e3);
+            {% endif %}
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .weather-card { 
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px; 
+            border-radius: 15px; 
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .weather-card h2 {
+            color: #2d3436;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+        
+        .temp { 
+            font-size: 3em; 
+            font-weight: bold;
+            margin: 15px 0;
+            {% if 'rain' in data.description.lower() %}
+                color: #636e72;
+            {% elif 'snow' in data.description.lower() %}
+                color: #74b9ff;
+            {% elif 'cloud' in data.description.lower() %}
+                color: #6c5ce7;
+            {% elif 'clear' in data.description.lower() or 'sun' in data.description.lower() %}
+                color: #e17055;
+            {% else %}
+                color: #0984e3;
+            {% endif %}
+        }
+        
+        .description {
+            font-size: 1.3em;
+            color: #636e72;
+            margin: 10px 0;
+            text-transform: capitalize;
+        }
+        
+        .weather-details {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .detail-item {
+            background: rgba(116, 185, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 5px;
+            font-size: 0.9em;
+            color: #2d3436;
+        }
+        
+        .alerts-section {
+            margin-bottom: 15px;
+        }
+        
+        .alert {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .alert-danger {
+            border-left-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+        
+        .alert-warning {
+            border-left-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+        
+        .alert-info {
+            border-left-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+        
+        .alert-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .alert-icon {
+            margin-right: 10px;
+            font-size: 1.3em;
+        }
+        
+        .alert-message {
+            color: #2d3436;
+            line-height: 1.4;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .outfit-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .outfit-card h3 {
+            color: #2d3436;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .suggestion-item {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 12px 8px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            text-transform: capitalize;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .suggestion-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .weather-icon {
+            font-size: 3em;
+            margin: 8px 0;
+        }
+        
+        .no-alerts-message {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="weather-card">
+            <h2>{{ data.city }}</h2>
+            
+            <!-- Weather icon based on condition -->
+            <div class="weather-icon">
+                {% if 'rain' in data.description.lower() %}
+                    🌧️
+                {% elif 'snow' in data.description.lower() %}
+                    ❄️
+                {% elif 'cloud' in data.description.lower() %}
+                    ☁️
+                {% elif 'clear' in data.description.lower() or 'sun' in data.description.lower() %}
+                    ☀️
+                {% else %}
+                    🌤️
+                {% endif %}
+            </div>
+            
+            <div class="temp">{{ data.temp }}°C</div>
+            <div class="description">{{ data.description }}</div>
+            
+            <div class="weather-details">
+                <div class="detail-item">
+                    💧 Humidity: {{ data.humidity }}%
+                </div>
+                <div class="detail-item">
+                    🌡️ Feels like: {{ data.feels_like }}°C
+                </div>
+                <div class="detail-item">
+                    💨 Wind: {{ data.wind_speed }} m/s
+                </div>
+                <div class="detail-item">
+                    👁️ Visibility: {{ data.visibility }} km
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Alerts Section -->
+        <div class="alerts-section">
+            {% if alerts %}
+                {% for alert in alerts %}
+                    <div class="alert alert-{{ alert.type }}">
+                        <div class="alert-header">
+                            <span class="alert-icon">{{ alert.icon }}</span>
+                            <span>{{ alert.title }}</span>
+                        </div>
+                        <div class="alert-message">{{ alert.message }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-alerts-message">
+                    ✅ No weather alerts - conditions are safe!
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="outfit-card">
+            <h3>👕 Suggested Outfit</h3>
+            <div class="suggestions-grid">
+                {% for item in suggestions %}
+                    <div class="suggestion-item">{{ item.title() }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="/" class="back-button">🔍 Check Another City</a>
+        </div>
+    </div>
+</body>
+</html>
